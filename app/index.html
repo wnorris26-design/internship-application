@@ -1,0 +1,467 @@
+<title>Wyatt's Internship Command Center</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column. Summary strip on top, then three tools behind tabs (Tracker, Fit check, Cover letter). */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --sunk:#e8ecef; --line:#d5dce2;
+  --ink:#16202a; --muted:#5b6876; --accent:#0d6b66; --accent-ink:#ffffff; --accent-soft:#d7ece9;
+  --warn:#a35208; --warn-soft:#fbe9d6; --bad:#b42318; --bad-soft:#fbe3e1; --good:#1d7a3a; --good-soft:#dcf1e2;
+  --hc:#0d6b66; --ops:#3b5a9a; --corp:#7a4b8c; --cons:#8a6512;
+  --f-display:"Manrope",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f151b; --surface:#17202a; --sunk:#1e2833; --line:#2c3a47;
+  --ink:#e6edf3; --muted:#9aa8b6; --accent:#4fbdb4; --accent-ink:#06201e; --accent-soft:#163a38;
+  --warn:#f0a35a; --warn-soft:#3a2714; --bad:#f2837a; --bad-soft:#3d1c1a; --good:#6fd08f; --good-soft:#15331f;
+  --hc:#4fbdb4; --ops:#8fa9e0; --corp:#c79ad8; --cons:#d8b25a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151b; --surface:#17202a; --sunk:#1e2833; --line:#2c3a47;
+  --ink:#e6edf3; --muted:#9aa8b6; --accent:#4fbdb4; --accent-ink:#06201e; --accent-soft:#163a38;
+  --warn:#f0a35a; --warn-soft:#3a2714; --bad:#f2837a; --bad-soft:#3d1c1a; --good:#6fd08f; --good-soft:#15331f;
+  --hc:#4fbdb4; --ops:#8fa9e0; --corp:#c79ad8; --cons:#d8b25a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body)}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.15rem;font-weight:700}
+.sub{color:var(--muted);margin:4px 0 0;max-width:65ch}
+.eyebrow{font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px}
+.conn{font:500 .75rem var(--f-mono);color:var(--muted)}
+/* summary strip */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{background:var(--surface);padding:12px 14px;display:grid;gap:2px;min-width:0}
+.stat b{font:700 1.35rem var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.82rem}
+.stat.next b{font-size:1rem;line-height:1.3}
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{appearance:none;border:0;background:none;color:var(--muted);font:600 .95rem var(--f-body);padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* controls */
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 .88rem var(--f-body);padding:8px 14px;border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:5px 10px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:default}
+select,input,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:180px;line-height:1.5}
+label{display:grid;gap:4px;font-size:.82rem;color:var(--muted);font-weight:500}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:500 .8rem var(--f-body);padding:4px 11px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* tracker list */
+.list{display:grid;gap:10px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;border-left:4px solid var(--sec,var(--line))}
+.post[data-sector="Healthcare"]{--sec:var(--hc)} .post[data-sector="Operations"]{--sec:var(--ops)} .post[data-sector="Corporate"]{--sec:var(--corp)} .post[data-sector="Consulting"]{--sec:var(--cons)}
+.post h3{font-size:1rem;font-weight:700}
+.post .co{font-weight:600;color:var(--muted);font-size:.85rem}
+.post .meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:.83rem}
+.post .notes{font-size:.87rem;margin:0;max-width:72ch}
+.post .side{display:grid;gap:8px;justify-items:end;align-content:start}
+.post .side select{width:auto}
+.post .acts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.due{font:500 .75rem var(--f-mono);padding:3px 8px;border-radius:5px;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.due.soon{background:var(--warn-soft);color:var(--warn)} .due.urgent{background:var(--bad-soft);color:var(--bad)} .due.past{text-decoration:line-through}
+.pill{font:600 .7rem var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--sec)}
+.prio{font:500 .72rem var(--f-mono);color:var(--muted)}
+a{color:var(--accent)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:26px;text-align:center;color:var(--muted)}
+details.add{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+details.add summary{cursor:pointer;font-weight:600}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.span{grid-column:1/-1}
+/* tools */
+.tool{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:760px){.tool{grid-template-columns:1fr}.post{grid-template-columns:1fr}.post .side{justify-items:start;grid-auto-flow:column;justify-content:start}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.score{display:flex;align-items:baseline;gap:10px}
+.score b{font:800 2.2rem var(--f-display);font-variant-numeric:tabular-nums}
+.reqs{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.reqs li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;font-size:.88rem}
+.tag{font:600 .68rem var(--f-mono);padding:2px 6px;border-radius:4px;height:fit-content;text-transform:uppercase;letter-spacing:.04em}
+.tag.yes{background:var(--good-soft);color:var(--good)} .tag.part{background:var(--warn-soft);color:var(--warn)} .tag.no{background:var(--bad-soft);color:var(--bad)}
+.letter{white-space:pre-wrap;font-size:.92rem;line-height:1.6;background:var(--sunk);border-radius:8px;padding:14px;min-height:240px;overflow-wrap:anywhere}
+.hint{font-size:.8rem;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:.85rem}
+@media (prefers-reduced-motion:no-preference){.post{transition:border-color .15s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Summer 2027 search · MBA, George Fox</div>
+      <h1>Internship Command Center</h1>
+      <p class="sub">Every posting you're chasing, sorted by deadline. Check how a posting fits you, then draft a cover letter in your voice from one of your three templates.</p>
+    </div>
+    <div class="conn" id="conn">Connecting…</div>
+  </header>
+
+  <section class="strip" aria-label="Summary">
+    <div class="stat next"><span>Next deadline</span><b id="s-next">–</b></div>
+    <div class="stat"><b id="s-toapply">0</b><span>to apply</span></div>
+    <div class="stat"><b id="s-applied">0</b><span>applied</span></div>
+    <div class="stat"><b id="s-interview">0</b><span>interviewing / offers</span></div>
+    <div class="stat"><b id="s-watch">0</b><span>watching for postings</span></div>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-tracker" aria-selected="true" data-view="tracker">Tracker</button>
+    <button role="tab" id="tab-fit" aria-selected="false" data-view="fit">Fit check</button>
+    <button role="tab" id="tab-letter" aria-selected="false" data-view="letter">Cover letter</button>
+  </nav>
+
+  <!-- TRACKER -->
+  <section id="view-tracker" role="tabpanel" style="display:grid;gap:14px">
+    <div class="row" style="justify-content:space-between">
+      <div class="chips" id="f-sector" aria-label="Filter by area"></div>
+      <div class="chips" id="f-status" aria-label="Filter by status"></div>
+    </div>
+    <div class="list" id="list"></div>
+    <details class="add" id="add">
+      <summary>Add a posting</summary>
+      <form id="addform" class="grid2">
+        <label>Company<input id="a-company" required></label>
+        <label>Role<input id="a-role" required></label>
+        <label>Location<input id="a-location"></label>
+        <label>Deadline<input id="a-deadline" type="date"></label>
+        <label>Area<select id="a-sector"><option>Healthcare</option><option>Operations</option><option>Corporate</option><option>Consulting</option></select></label>
+        <label>Cover letter template<select id="a-template"><option value="healthcare">Healthcare</option><option value="ops">Operations / supply chain</option><option value="cx">Customer / AI</option></select></label>
+        <label class="span">Link<input id="a-url" type="url" placeholder="https://"></label>
+        <label class="span">Notes<input id="a-notes"></label>
+        <div class="row span"><button class="btn primary" type="submit">Add posting</button><span class="hint" id="a-msg"></span></div>
+      </form>
+    </details>
+  </section>
+
+  <!-- FIT CHECK -->
+  <section id="view-fit" role="tabpanel" hidden>
+    <div class="tool">
+      <div class="panel">
+        <h2>Paste a posting</h2>
+        <label>Which posting is this? (optional)<select id="fit-pick"></select></label>
+        <label>Job description<textarea id="fit-text" placeholder="Paste the full posting here, including the qualifications."></textarea></label>
+        <div class="row"><button class="btn primary" id="fit-go">Check my fit</button><span class="hint" id="fit-msg"></span></div>
+        <p class="hint">Claude compares each requirement to your resume. It won't count anything you haven't done, like Power BI or Salesforce.</p>
+      </div>
+      <div class="panel" id="fit-out" aria-live="polite">
+        <div class="eyebrow">Example result</div>
+        <div class="score"><b>78</b><span class="hint">/ 100 · strong fit, apply</span></div>
+        <ul class="reqs">
+          <li><span class="tag yes">match</span><span><b>Customer focus.</b> Four years handling customers and business orders at the liquor store.</span></li>
+          <li><span class="tag yes">match</span><span><b>Analyze and improve processes.</b> Capstone: 250 test scenarios, pass rate 69% to 99%.</span></li>
+          <li><span class="tag part">partial</span><span><b>Microsoft Office.</b> Excel, Word, PowerPoint yes. Advanced Excel modeling not shown.</span></li>
+          <li><span class="tag no">gap</span><span><b>Power BI / Tableau.</b> Not on your resume. Say you're learning it, don't claim it.</span></li>
+        </ul>
+        <p class="hint">This is a sample from the Daimler CX posting. Paste a real one on the left.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COVER LETTER -->
+  <section id="view-letter" role="tabpanel" hidden>
+    <div class="tool">
+      <div class="panel">
+        <h2>Draft a cover letter</h2>
+        <label>Posting<select id="cl-pick"></select></label>
+        <label>Template<select id="cl-template"><option value="healthcare">Healthcare</option><option value="ops">Operations / supply chain</option><option value="cx">Customer / AI</option></select></label>
+        <label>Job description (paste it for a tailored letter)<textarea id="cl-text" placeholder="Paste the posting. Without it the letter only uses the company, role and your notes."></textarea></label>
+        <label>Anything to mention? (optional)<input id="cl-extra" placeholder="e.g. I met their recruiter at the George Fox career fair"></label>
+        <div class="row"><button class="btn primary" id="cl-go">Draft with Claude</button><button class="btn" id="cl-plain">Fill template only</button><span class="hint" id="cl-msg"></span></div>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between"><h2 id="cl-title">Letter</h2><button class="btn small" id="cl-copy">Copy</button></div>
+        <div class="letter" id="cl-out" aria-live="polite" tabindex="0"></div>
+        <p class="hint">Read it once before you send it. Add your contact header from your resume doc, and fix anything that doesn't sound like you.</p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const STATUSES=["Watching","To apply","Applied","Interviewing","Offer","Closed / passed"];
+const SECTORS=["Healthcare","Operations","Corporate","Consulting"];
+const TEMPLATE_NAMES={healthcare:"Healthcare",ops:"Operations / supply chain",cx:"Customer / AI"};
+
+const PROFILE=`Wyatt Norris. Fast-track 12-month MBA, George Fox University, finishing August 2027. BS in Exercise Science (kinesiology), Pacific Lutheran University, May 2026. Former PLU baseball pitcher. Based in the Portland, OR area.
+Experience:
+- Norris Construction LLC (family remodeling business), Construction Crew Member, Portland OR, 06/2019 to present: framing, flooring, painting, demolition, lighting install, finish work; trains and mentors a newer crew member; follows project plans, timelines and safety procedures.
+- Elite Physical Therapy, Physical Therapy Intern, Parkland WA, Spring 2026: observed outpatient orthopedic, post-op and general patients; supported clinic organization, exercise setup and patient flow.
+- ROKKE Performance Therapy, Performance Training & PT Intern, Tigard OR, 06/2025 to 08/2025 (10 weeks): coached athletes from middle school to NCAA D1 and pro; helped run strength, conditioning, injury prevention and return-to-play programs; observed evaluations, treatment plans and how a small healthcare business operates.
+- Family-owned liquor store, Retail Associate, West Linn OR, 06/2020 to 08/2024: customer service and POS; inventory receiving, stocking, merchandising; coordinated restaurant and business orders from communication to delivery.
+Projects:
+- MBA capstone AI tool: built and tested it with 250 test scenarios, found what was failing, raised the pass rate from 69% to 99%.
+- Norris Construction Hub: AI tools built with Claude / Claude Code for the family business.
+- AI coaching tools and an AI governance program (privacy, risk, responsible use).
+Skills: Microsoft Excel, Word, PowerPoint, Google Workspace, project coordination, inventory management, order fulfillment, customer and client relations, process improvement, data analysis, AI tool design and testing (Claude, Claude Code), training and mentoring.
+Does NOT have: Power BI, Tableau, Salesforce, SQL, formal healthcare admin job experience.
+Career goal: healthcare administration, using AI to help understaffed health systems. Aiming for a 2027 health-system internship, then an administrative fellowship (e.g. OHSU) in 2028.`;
+
+const VOICE=`Write as Wyatt. Plain, friendly, sincere and humble, never salesy. Use longer connected sentences joined with "and," "so," "as," "given that." Mix "I am" and "I'm." Ground claims in his real experience and give the real reason he's interested (he planned on PT school, that didn't work out, and he moved toward the business side through the MBA). Hard rules: no em dashes, no semicolons, no bullets or headers, no "I hope this finds you well," "I am thrilled," "passionate about," "leverage," "synergy," "delve," "Best regards." No rule-of-three adjective lists, no dramatic one-line sentences, no opening rhetorical questions. Never claim a skill he doesn't have, and say he is eager to learn it instead. Keep it to 3 or 4 paragraphs, about 250 to 330 words. Start with "Dear Hiring Team," (or the hiring manager's name if the posting gives one) and end with "Thank you for your time and consideration,\\nWyatt Norris".`;
+
+const TEMPLATES={
+healthcare:`Dear Hiring Team,
+
+I am applying for the {role} at {company}. I just finished my Exercise Science degree at PLU and I am now in George Fox's 12-month MBA program, and I originally planned on going to PT school, but through my internships at ROKKE Performance Therapy and Elite Physical Therapy I realized the part I was most drawn to was how the clinic actually ran, from patient flow to scheduling to how a small healthcare business keeps everything moving.
+
+That is a big reason I'm focused on healthcare administration now. Health systems are short on people and are trying to figure out how to use AI responsibly, and that is where I think I can help. In my MBA capstone I built an AI tool and tested it against 250 scenarios, found where it was failing and brought the pass rate from 69% to 99%, and I have also helped put together an AI governance program focused on privacy and risk, which matters a lot in healthcare.
+
+Outside of school I have worked on my family's remodeling business since 2019, where I follow project plans and timelines and train a newer crew member, and I spent four years at a family-owned store handling customers, inventory and business orders. {custom}
+
+I would really appreciate the chance to learn from your team at {company} and help wherever I can.
+
+Thank you for your time and consideration,
+Wyatt Norris`,
+ops:`Dear Hiring Team,
+
+I am applying for the {role} at {company}. I am currently in George Fox's 12-month MBA program, and a lot of my background has been in work where things have to show up on time and in the right order, so this role caught my attention right away.
+
+For four years I worked at a family-owned store where I handled shipment receiving, stocking and merchandising, and I coordinated restaurant and business orders from the first conversation all the way through delivery. I have also worked on my family's remodeling business since 2019, where I follow project plans, timelines and safety procedures and train a newer crew member on pace and quality standards.
+
+In my MBA capstone I built an AI tool and tested it against 250 scenarios, figured out what was failing and raised the pass rate from 69% to 99%, and that process of finding what's broken and fixing it is the part of operations work I enjoy most. I use Excel, PowerPoint and Word regularly and I'm comfortable learning new systems quickly. {custom}
+
+I would really appreciate the opportunity to bring that to {company} and keep learning from your team.
+
+Thank you for your time and consideration,
+Wyatt Norris`,
+cx:`Dear Hiring Team,
+
+I am applying for the {role} at {company}. I am in George Fox's 12-month MBA program, and the two things I keep coming back to are taking care of customers and using AI to make processes work better, so this role felt like a really good fit.
+
+I spent four years at a family-owned store helping customers pick products, running transactions and coordinating restaurant and business orders from the first call to delivery, so I have seen firsthand how much small details in the customer experience matter.
+
+On the AI side, my MBA capstone was an AI tool I built and tested against 250 scenarios, and by working through what was failing I brought the pass rate from 69% to 99%. I have also built the Norris Construction Hub, a set of AI tools for my family's remodeling business, using Claude and Claude Code. {custom}
+
+I would really appreciate the chance to learn from your team at {company} and contribute where I can.
+
+Thank you for your time and consideration,
+Wyatt Norris`};
+
+// ---------- state ----------
+let posts=[]; let db=null, sample=null, readOnly=false;
+const filt={sector:"All",status:"Active"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2200)}
+function today(){const d=new Date();d.setHours(0,0,0,0);return d}
+function daysLeft(iso){if(!iso)return null;const d=new Date(iso+"T00:00:00");return Math.round((d-today())/864e5)}
+function dueChip(p){const n=daysLeft(p.deadline);
+  if(n===null)return `<span class="due">${esc(p.deadlineNote||"No date yet")}</span>`;
+  const cls=n<0?"due past":n<=3?"due urgent":n<=14?"due soon":"due";
+  const label=n<0?`closed ${-n}d ago`:n===0?"due today":n===1?"due tomorrow":`${n} days left`;
+  const date=new Date(p.deadline+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  return `<span class="${cls}" title="${esc(p.deadlineNote||"")}">${date} · ${label}</span>`}
+function sortPosts(a,b){const da=daysLeft(a.deadline),dbb=daysLeft(b.deadline);
+  const ka=da===null?1e6:(da<0?2e6:da),kb=dbb===null?1e6:(dbb<0?2e6:dbb);
+  return ka-kb||(a.priority||3)-(b.priority||3)||a.company.localeCompare(b.company)}
+
+// ---------- render ----------
+function renderFilters(){
+  $("#f-sector").innerHTML=["All",...SECTORS].map(s=>`<button class="chip" aria-pressed="${filt.sector===s}" data-s="${s}">${s}</button>`).join("");
+  $("#f-status").innerHTML=["Active",...STATUSES,"All"].map(s=>`<button class="chip" aria-pressed="${filt.status===s}" data-st="${s}">${s}</button>`).join("");
+}
+function visible(p){
+  if(filt.sector!=="All"&&p.sector!==filt.sector)return false;
+  if(filt.status==="Active")return p.status!=="Closed / passed";
+  if(filt.status==="All")return true;
+  return p.status===filt.status}
+function renderList(){
+  const L=$("#list");
+  if(!posts.length){L.innerHTML=`<div class="empty">${db?"No postings yet. Use <b>Add a posting</b> below, or ask Claude to load your starter list.":"Loading your postings…"}</div>`;return}
+  const v=posts.filter(visible).sort(sortPosts);
+  if(!v.length){L.innerHTML=`<div class="empty">Nothing matches these filters.</div>`;return}
+  L.innerHTML=v.map(p=>`<article class="post" data-sector="${esc(p.sector)}">
+    <div style="display:grid;gap:5px;min-width:0">
+      <div class="row" style="gap:10px"><span class="pill">${esc(p.sector)}</span><span class="prio">${"●".repeat(4-(p.priority||3))}${"○".repeat((p.priority||3)-1)} priority</span></div>
+      <h3>${esc(p.role)}</h3>
+      <div class="co">${esc(p.company)}</div>
+      <div class="meta"><span>${esc(p.location||"")}</span><span>Letter: ${esc(TEMPLATE_NAMES[p.template]||"–")}</span></div>
+      ${p.notes?`<p class="notes">${esc(p.notes)}</p>`:""}
+    </div>
+    <div class="side">
+      ${dueChip(p)}
+      <select data-status="${esc(p.id)}" aria-label="Status for ${esc(p.company)}" ${readOnly?"disabled":""}>${STATUSES.map(s=>`<option ${s===p.status?"selected":""}>${s}</option>`).join("")}</select>
+    </div>
+    <div class="acts">
+      ${p.url?`<a class="btn small" href="${esc(p.url)}" target="_blank" rel="noopener">Open posting</a>`:""}
+      <button class="btn small" data-fit="${esc(p.id)}">Check fit</button>
+      <button class="btn small" data-letter="${esc(p.id)}">Draft letter</button>
+      ${readOnly?"":`<button class="btn small" data-note="${esc(p.id)}">Edit notes</button>`}
+    </div></article>`).join("")}
+function renderStats(){
+  const c=s=>posts.filter(p=>p.status===s).length;
+  $("#s-toapply").textContent=c("To apply");$("#s-applied").textContent=c("Applied");
+  $("#s-interview").textContent=c("Interviewing")+c("Offer");$("#s-watch").textContent=c("Watching");
+  const up=posts.filter(p=>p.status==="To apply"&&daysLeft(p.deadline)!==null&&daysLeft(p.deadline)>=0).sort(sortPosts)[0];
+  $("#s-next").textContent=up?`${up.company}: ${daysLeft(up.deadline)===0?"today":daysLeft(up.deadline)+" days"}`:"None dated";
+}
+function renderPickers(){
+  const opts=`<option value="">Not in my tracker</option>`+posts.slice().sort((a,b)=>a.company.localeCompare(b.company)).map(p=>`<option value="${esc(p.id)}">${esc(p.company)}: ${esc(p.role)}</option>`).join("");
+  for(const id of ["#fit-pick","#cl-pick"]){const el=$(id),cur=el.value;el.innerHTML=opts;el.value=posts.some(p=>p.id===cur)?cur:""}
+}
+function renderAll(){renderFilters();renderList();renderStats();renderPickers()}
+
+// ---------- events ----------
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.view)return show(t.dataset.view);
+  if(t.dataset.s){filt.sector=t.dataset.s;return renderAll()}
+  if(t.dataset.st){filt.status=t.dataset.st;return renderAll()}
+  if(t.dataset.fit){$("#fit-pick").value=t.dataset.fit;show("fit");$("#fit-text").focus();return}
+  if(t.dataset.letter){const p=posts.find(x=>x.id===t.dataset.letter);$("#cl-pick").value=p.id;$("#cl-template").value=p.template||"ops";show("letter");$("#cl-text").focus();return}
+  if(t.dataset.note)return editNote(t.dataset.note,t);
+});
+document.addEventListener("change",async e=>{
+  const id=e.target.dataset.status;if(!id)return;
+  const p=posts.find(x=>x.id===id);const prev=p.status;p.status=e.target.value;
+  if(p.status==="Applied"&&!p.appliedOn)p.appliedOn=new Date().toISOString().slice(0,10);
+  renderStats();
+  try{await db.doc("postings/"+id).update({status:p.status,appliedOn:p.appliedOn||null});toast(`Marked ${p.status}`)}
+  catch(err){p.status=prev;renderAll();toast("Couldn't save that change. Try again.")}
+});
+$("#cl-pick").addEventListener("change",()=>{const p=posts.find(x=>x.id===$("#cl-pick").value);if(p)$("#cl-template").value=p.template||"ops"});
+function show(v){for(const n of ["tracker","fit","letter"]){$("#view-"+n).hidden=n!==v;$("#tab-"+n).setAttribute("aria-selected",n===v)}
+  try{localStorage.setItem("icc-tab",v)}catch{}}
+function editNote(id,btn){
+  const p=posts.find(x=>x.id===id);const art=btn.closest(".post");
+  if(art.querySelector(".noteedit"))return;
+  const box=document.createElement("div");box.className="noteedit";box.style.cssText="grid-column:1/-1;display:grid;gap:6px";
+  box.innerHTML=`<textarea style="min-height:80px" id="note-${esc(id)}">${esc(p.notes||"")}</textarea><div class="row"><button class="btn small primary">Save notes</button><button class="btn small">Cancel</button></div>`;
+  art.appendChild(box);
+  const [save,cancel]=box.querySelectorAll("button");
+  cancel.onclick=()=>box.remove();
+  save.onclick=async()=>{const val=box.querySelector("textarea").value;
+    try{await db.doc("postings/"+id).update({notes:val});p.notes=val;toast("Notes saved");renderList()}catch{toast("Couldn't save notes. Try again.")}};
+}
+$("#addform").addEventListener("submit",async e=>{
+  e.preventDefault();if(!db||readOnly){$("#a-msg").textContent="Saving isn't available in this view.";return}
+  const company=$("#a-company").value.trim(),role=$("#a-role").value.trim();
+  const id=(company+"-"+role).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60)+"-"+Date.now().toString(36).slice(-4);
+  const doc={id,company,role,location:$("#a-location").value.trim(),deadline:$("#a-deadline").value||null,deadlineNote:"",sector:$("#a-sector").value,template:$("#a-template").value,url:$("#a-url").value.trim(),notes:$("#a-notes").value.trim(),status:"To apply",priority:2,addedOn:new Date().toISOString().slice(0,10)};
+  try{await db.doc("postings/"+id).set(doc);e.target.reset();$("#a-msg").textContent="";toast(`Added ${company}`)}
+  catch{$("#a-msg").textContent="Couldn't save. Check the fields and try again."}
+});
+
+// ---------- fit check ----------
+function keywordFit(text){
+  const t=text.toLowerCase();
+  const have={"excel":"Microsoft Excel","microsoft office":"Microsoft Office","powerpoint":"PowerPoint","customer":"Customer service (4 yrs retail + business orders)","inventory":"Inventory management","supply chain":"Supply chain / order fulfillment","logistic":"Logistics / order coordination","project":"Project coordination (Norris Construction)","process improvement":"Process improvement (capstone 69%→99%)","data":"Data analysis","ai":"AI tool design and testing","artificial intelligence":"AI tool design and testing","healthcare":"Two clinical internships (ROKKE, Elite PT)","patient":"Patient flow / clinic support","communication":"Communication","team":"Team collaboration","mentor":"Training and mentoring","mba":"MBA in progress (George Fox, Aug 2027)"};
+  const lack={"power bi":"Power BI","tableau":"Tableau","salesforce":"Salesforce","sql":"SQL","python":"Python","epic":"Epic EHR","lean":"Lean / Six Sigma","six sigma":"Lean / Six Sigma"};
+  const m=[...new Set(Object.entries(have).filter(([k])=>new RegExp("\\b"+k).test(t)).map(([,v])=>v))];
+  const g=[...new Set(Object.entries(lack).filter(([k])=>t.includes(k)).map(([,v])=>v))];
+  return {score:Math.max(20,Math.min(90,40+m.length*6-g.length*7)),verdict:"Keyword match only (Claude wasn't available)",requirements:[...m.map(x=>({requirement:x,status:"match",evidence:"Mentioned in the posting and on your resume."})),...g.map(x=>({requirement:x,status:"gap",evidence:"Not on your resume. Don't claim it."}))],emphasize:[],template:null}
+}
+$("#fit-go").addEventListener("click",async()=>{
+  const text=$("#fit-text").value.trim();const msg=$("#fit-msg");
+  if(text.length<80){msg.textContent="Paste the full posting first.";return}
+  const p=posts.find(x=>x.id===$("#fit-pick").value);
+  const btn=$("#fit-go");btn.disabled=true;msg.textContent=sample?"Reading the posting…":"";
+  let r;
+  try{
+    if(!sample)throw {code:"none"};
+    r=await sample.json(`You are a blunt, fair career advisor. Compare this candidate to the job posting. Only count experience that is actually in the profile. Do not invent experience.
+
+CANDIDATE PROFILE:
+${PROFILE}
+
+JOB POSTING${p?` (${p.company}, ${p.role})`:""}:
+${text.slice(0,14000)}
+
+Return JSON only, with this shape:
+{"score": 0-100 integer for how competitive he is for THIS posting, "verdict": "one short sentence: apply / apply with care / long shot, and why", "requirements": [{"requirement": "short name of a real requirement from the posting", "status": "match" | "partial" | "gap", "evidence": "one sentence citing his real experience, or what's missing and how to handle it honestly"}] (6 to 10 items, most important first), "emphasize": ["2 to 4 short things to lead with in the cover letter"], "eligibility": "any eligibility issue such as graduation date, location, degree level, or empty string", "template": "healthcare" | "ops" | "cx"}`,{modelTier:"default"});
+  }catch(err){
+    if(err&&err.code==="rate_limited"){msg.textContent="Claude is rate limited right now. Showing a keyword match instead.";}
+    else msg.textContent=sample?"Claude couldn't check this one. Showing a keyword match instead.":"Showing a keyword match.";
+    r=keywordFit(text);
+  }finally{btn.disabled=false}
+  if(sample&&!msg.textContent.includes("keyword"))msg.textContent="";
+  const out=$("#fit-out");
+  out.innerHTML=`<div class="eyebrow">${p?esc(p.company+" · "+p.role):"Your fit"}</div>
+    <div class="score"><b>${esc(r.score)}</b><span class="hint">/ 100 · ${esc(r.verdict)}</span></div>
+    ${r.eligibility?`<p class="hint" style="color:var(--warn)"><b>Eligibility:</b> ${esc(r.eligibility)}</p>`:""}
+    <ul class="reqs">${(r.requirements||[]).map(q=>`<li><span class="tag ${q.status==="match"?"yes":q.status==="partial"?"part":"no"}">${q.status==="match"?"match":q.status==="partial"?"partial":"gap"}</span><span><b>${esc(q.requirement)}.</b> ${esc(q.evidence)}</span></li>`).join("")}</ul>
+    ${(r.emphasize||[]).length?`<div><div class="eyebrow">Lead with</div><ul style="margin:6px 0 0;padding-left:18px">${r.emphasize.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+    <div class="row"><button class="btn small primary" id="fit-to-letter">Draft a letter from this</button></div>`;
+  $("#fit-to-letter").onclick=()=>{$("#cl-text").value=text;$("#cl-pick").value=p?p.id:"";if(r.template&&TEMPLATES[r.template])$("#cl-template").value=r.template;$("#cl-extra").value=(r.emphasize||[]).length?"Lead with: "+r.emphasize.join("; "):"";show("letter")};
+});
+
+// ---------- cover letter ----------
+function fillTemplate(){
+  const p=posts.find(x=>x.id===$("#cl-pick").value);
+  const tpl=TEMPLATES[$("#cl-template").value];
+  const company=p?p.company:"[Company]",role=p?p.role:"[Role]";
+  return tpl.replaceAll("{company}",company).replaceAll("{role}",role).replace("{custom}",$("#cl-extra").value.trim()?$("#cl-extra").value.trim():"[Add one sentence about why this company specifically.]")
+}
+$("#cl-plain").addEventListener("click",()=>{$("#cl-out").textContent=fillTemplate();$("#cl-msg").textContent="Template filled. Swap the bracketed line for something specific."});
+let clAbort=null;
+$("#cl-go").addEventListener("click",async()=>{
+  const msg=$("#cl-msg"),out=$("#cl-out");
+  if(!sample){out.textContent=fillTemplate();msg.textContent="Claude isn't available here, so this is the filled template.";return}
+  const p=posts.find(x=>x.id===$("#cl-pick").value);const posting=$("#cl-text").value.trim();
+  if(!p&&posting.length<80){msg.textContent="Pick a posting or paste the job description.";return}
+  clAbort?.abort();clAbort=new AbortController();
+  const btn=$("#cl-go");btn.disabled=true;msg.textContent="Drafting…";out.textContent="";
+  $("#cl-title").textContent=p?`${p.company}`:"Letter";
+  const base=TEMPLATES[$("#cl-template").value].replaceAll("{company}",p?p.company:"the company").replaceAll("{role}",p?p.role:"this role").replace("{custom}","");
+  try{
+    const res=await sample(`Write a cover letter for this candidate. Use the base template as the starting point and keep his facts and voice, but tailor it to what the posting actually asks for. Rewrite or reorder paragraphs as needed and add one specific, true reason he wants this company. Return only the letter text.
+
+VOICE RULES:
+${VOICE}
+
+CANDIDATE PROFILE (the only facts you may use):
+${PROFILE}
+
+ROLE: ${p?p.role+" at "+p.company+(p.location?" ("+p.location+")":""):"see posting"}
+${p&&p.notes?"HIS NOTES ON THIS POSTING: "+p.notes:""}
+${$("#cl-extra").value.trim()?"HE ALSO WANTS TO MENTION: "+$("#cl-extra").value.trim():""}
+
+JOB POSTING:
+${posting?posting.slice(0,12000):"(not provided. Use the role title and company only, and don't invent requirements.)"}
+
+BASE TEMPLATE:
+${base}`,{signal:clAbort.signal,cache:false,modelTier:"default",onText:({text})=>{out.textContent=text}});
+    out.textContent=res.text.replace(/—/g,",");msg.textContent=res.truncated?"The draft got cut off. Try again.":"Draft ready.";
+  }catch(err){
+    if(err&&err.code==="cancelled")return;
+    out.textContent=out.textContent||fillTemplate();
+    msg.textContent=err&&err.code==="not_granted"?"Claude access was turned off for this page, so this is the filled template.":err&&err.code==="rate_limited"?"Claude is rate limited. Wait a minute and try again.":"Claude couldn't draft this one, so this is the filled template.";
+  }finally{btn.disabled=false}
+});
+$("#cl-copy").addEventListener("click",()=>{
+  const txt=$("#cl-out").textContent;if(!txt){toast("Nothing to copy yet");return}
+  navigator.clipboard.writeText(txt).then(()=>toast("Copied")).catch(()=>{const r=document.createRange();r.selectNodeContents($("#cl-out"));const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Selected. Press Ctrl/Cmd+C to copy.")});
+});
+
+// ---------- boot ----------
+try{const t=localStorage.getItem("icc-tab");if(t)show(t)}catch{}
+renderAll();
+$("#cl-out").textContent=fillTemplate();
+(async()=>{
+  const conn=$("#conn");
+  const [d,s,u]=await Promise.all(["db","sample","user"].map(n=>window.claude?.use?window.claude.use(n):Promise.resolve(null))).catch(()=>[null,null,null]);
+  db=d;sample=s;
+  if(u){try{const w=await u.can("data.write");if(w===false)readOnly=true}catch{}}
+  if(!db){
+    readOnly=true;conn.textContent="Offline copy · changes won't save";
+    try{const r=await fetch("data/internships.json");if(r.ok){posts=await r.json();renderAll()}}catch{}
+    if(!posts.length)$("#list").innerHTML=`<div class="empty">Your tracker couldn't load here. Open this page from its claude.ai link while signed in.</div>`;
+    return}
+  let first=true;
+  const timer=setTimeout(()=>{if(first){conn.textContent="Still loading…"}},10000);
+  db.collection("postings").onSnapshot(snap=>{
+    clearTimeout(timer);first=false;
+    posts=snap.docs.map(x=>({id:x.id,...x.data()}));
+    conn.textContent=(readOnly?"View only":"Saved to your tracker")+(sample?" · Claude on":"");
+    renderAll();
+  },err=>{clearTimeout(timer);conn.textContent="Couldn't reach your tracker. Reload to retry."});
+})();
+</script>
